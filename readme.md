@@ -1,8 +1,8 @@
 # Inverses Pendel mit Reinforcement Learning
 
-In this reposetory inverse pendel has been implemented in two different ways
+In this repository controll of  inverse pendel has been implemented
 
-## With GYM cartpole:
+## Q-Learning with GYM cartpole:
 
 1) Install the requirements.txt with ' pip install requirments.txt '
 2) the settings of the training can be changed in config.py
@@ -11,9 +11,20 @@ In this reposetory inverse pendel has been implemented in two different ways
    
 4) The Q-table can be used and visulised via 'python main.py'
 
-Reference-style: 
+![Training progress with 200 steps](Q-learning/demo/demo200steps.png) 
 
-![Training progress with 200 steps](Q-learning_premade/demo/demo200steps.png)
+![Demo with 200 steps](Q-learning/demo/demo200steps.gif) 
 
+The space-state of the cartpole was implemented in this repository:
+https://github.com/openai/gym/blob/master/gym/envs/classic_control/cartpole.py
 
-## With Inverse pendel from ground up:
+##TODO:
+ * Impalement DQN
+ * Impalement DDQN
+ 
+## Authors:
+* **Danial Hezarkhani**
+
+## License
+
+This project is licensed under the MIT License
