@@ -1,4 +1,5 @@
-import math
+
+
 # user-defined parameters
 min_explore_rate = 0.1
 min_learning_rate = 0.1
@@ -9,7 +10,7 @@ solved_time = 199
 discount = 0.99
 no_streaks = 0
 
-
+# limits of the cartpole
 x_limits = (-0.5, 0.5)
 phi_limits = (-50, 50)
 
@@ -17,8 +18,8 @@ phi_limits = (-50, 50)
 #(x, ẋ, θ, θ̇)
 number_of_buckets = (1, 1, 6, 3)
 
+# speed of the visualisation
+visualisation_speed = 0.1
 
-visualisation_speed = 0.01
-
-# saving address
+# saving address for the files
 file_name = 'weights/' + str(min_explore_rate) + '_' + str(number_of_buckets)
