@@ -1,5 +1,4 @@
 import gym
-import argparse
 import numpy as np
 import random
 import math
@@ -11,9 +10,9 @@ import config
 
 
 
-def test():
+def start_test():
     # load the npy file of q-table saved after training:
-    q_value_table = np.load('file_name.npy')
+    q_value_table = np.load(config.file_name + '.npy')
     print(q_value_table)
 
     # make the gym
@@ -42,6 +41,3 @@ def test():
         observation, reward_gain, done, info = env.step(action)
 
     env.close()
-
-if __name__ == "__main__":
-    test()

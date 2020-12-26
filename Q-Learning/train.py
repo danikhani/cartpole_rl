@@ -1,59 +1,29 @@
 import gym
-import argparse
 import numpy as np
 import random
 import math
 import matplotlib.pyplot as plt
 
 import train_utils as t_utils
-
-def parse_input():
-
-    parser = argparse.ArgumentParser(description='Inverses Pendel mit QLearning')
-    parser.add_argument('-t,','--training',action='store_true',help='Switches to training mode. Default=false')
-    parser.add_argument('-l','--learning_rate',type=float,help='Min Learning rate', default=0.1)
-    parser.add_argument('-ex', '--exploration_rate', type=float, help='Min Exploration rate', default=0.1)
-    parser.add_argument('-ep', '--max_episodes', type=int, help='Max Episode number', default=1000)
-
-    args = parser.parse_args()
-    return args
+import config
 
 
-def train():
-    args = parse_input()
+def start_train():
 
     env = gym.make('CartPole-v0')
+    env._max_episode_steps = config.max_time_steps
 
-    # number of buckets for discretizing the stats in them.
-    no_buckets = (1, 1, 6, 3)
     # number of actions which are possible
     no_actions = env.action_space.n
 
     state_value_bounds = list(zip(env.observation_space.low,
                                   env.observation_space.high))
-    state_value_bounds[1] = (-0.5, 0.5)
-    state_value_bounds[3] = (-math.radians(50), math.radians(50))
-
-    print(state_value_bounds)
-    print(len(state_value_bounds))
-    print(np.shape(state_value_bounds))
-    print(state_value_bounds[0][0])
+    state_value_bounds[1] = config.x_limits
+    state_value_bounds[3] = (math.radians(config.phi_limits[0]), math.radians(config.phi_limits[1]))
 
     # define q_value_table
-    q_value_table = np.zeros(no_buckets + (no_actions,))
+    q_value_table = np.zeros(config.number_of_buckets + (no_actions,))
 
-    # Q has 6 dimensions 1 x 1 x 6 x 3 x 2
-    #print(q_value_table)
-
-    # user-defined parameters
-    min_explore_rate = args.exploration_rate
-    min_learning_rate = args.learning_rate
-    max_episodes = args.max_episodes
-    max_time_steps = 200
-    streak_to_end = 120
-    solved_time = 199
-    discount = 0.99
-    no_streaks = 0
 
     _DEBUG = False
     frames = []
@@ -65,10 +35,10 @@ def train():
 
     # train the system
     totaltime = 0
-    for episode_no in range(max_episodes):
+    for episode_no in range(config.max_episodes):
 
-        explore_rate = t_utils.select_explore_rate(episode_no,min_explore_rate)
-        learning_rate = t_utils.select_learning_rate(episode_no,min_learning_rate)
+        explore_rate = t_utils.select_explore_rate(episode_no,config.min_explore_rate)
+        learning_rate = t_utils.select_learning_rate(episode_no,config.min_learning_rate)
 
         learning_rate_per_episode.append(learning_rate)
         explore_rate_per_episode.append(explore_rate)
@@ -76,7 +46,7 @@ def train():
         # reset the environment while starting a new episode
         observation = env.reset()
 
-        start_state_value = t_utils.bucketize_state_value(observation,state_value_bounds,no_buckets)
+        start_state_value = t_utils.bucketize_state_value(observation,state_value_bounds,config.number_of_buckets)
         previous_state_value = start_state_value
 
         done = False
@@ -86,12 +56,12 @@ def train():
             # env.render()
             action = t_utils.select_action(previous_state_value, explore_rate,env,q_value_table)
             observation, reward_gain, done, info = env.step(action)
-            state_value = t_utils.bucketize_state_value(observation,state_value_bounds,no_buckets)
+            state_value = t_utils.bucketize_state_value(observation,state_value_bounds,config.number_of_buckets)
             best_q_value = np.max(q_value_table[state_value])
 
             # update q_value_table
             q_value_table[previous_state_value][action] += learning_rate * (
-                    reward_gain + discount * best_q_value -
+                    reward_gain + config.discount * best_q_value -
                     q_value_table[previous_state_value][action])
 
             previous_state_value = state_value
@@ -110,12 +80,12 @@ def train():
             time_step += 1
             # while loop ends here
 
-        if time_step >= solved_time:
-            no_streaks += 1
+        if time_step >= config.solved_time:
+            config.no_streaks += 1
         else:
-            no_streaks = 0
+            config.no_streaks = 0
 
-        if no_streaks > streak_to_end:
+        if config.no_streaks > config.streak_to_end:
             print('CartPole problem is solved after {} episodes.'.format(episode_no))
             break
 
@@ -129,6 +99,8 @@ def train():
 
     env.close()
 
+
+
     # Plotting
     fig, axes = plt.subplots(2, 1, sharex=True)
     axes[0].plot(time_per_episode)
@@ -138,12 +110,9 @@ def train():
     axes[1].plot(explore_rate_per_episode)
     axes[1].set_ylim([0, 1])
     axes[1].set(xlabel='Episodes', ylabel='Learning rate')
-    plt.savefig("cp_qlearn_plot.png")
+    plt.savefig(config.file_name + '.png')
     plt.show()
 
+    # savomg training weight
+    np.save(config.file_name, q_value_table)
 
-    np.save('file_name', q_value_table)
-
-
-if __name__ == "__main__":
-    train()
